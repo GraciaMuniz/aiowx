@@ -212,6 +212,7 @@ class AioWx:
                 continue
             tmp_list.append('{}={}'.format(key, value))
         to_hash = '&'.join(tmp_list)
+        print(to_hash)
         return hashlib.sha1(to_hash.encode()).hexdigest()
 
     def jsapi_init_param(self, ticket, url):
@@ -221,8 +222,9 @@ class AioWx:
             'timestamp': int(time.time()),
             'url': url,
         }
+        sign = self.sign_js_sdk(to_signed)
+        to_signed['signature'] = sign
         to_signed['appid'] = self.app_id
-        to_signed['signature'] = self.sign_js_sdk(to_signed)
         return to_signed
 
     async def oauth2(self, code):
