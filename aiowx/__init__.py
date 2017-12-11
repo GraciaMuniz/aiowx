@@ -297,7 +297,7 @@ class AioWx:
                     json_body = json.loads(body)
                     errcode = json_body.get('errcode')
                     if errcode > 0:
-                        raise self.WxError()
+                        raise self.WxError(json.dumps(json_body))
                     return {'msgid': json_body.get('msgid')}
         except asyncio.TimeoutError:
             raise self.TimeoutError()
