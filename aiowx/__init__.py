@@ -26,6 +26,9 @@ class AioWx:
     class WxPayError(Exception):
         pass
 
+    class WxError(Exception):
+        pass
+
     host = 'https://api.mch.weixin.qq.com'
 
     def __init__(self, app_id, mch_id, key, secret, cert_pem_path,
@@ -150,6 +153,20 @@ class AioWx:
         params.update(**kwargs)
         return await self._do_post(path, params)
 
+    async def orderquery(self, out_trade_no=None, transaction_id=None,
+                         **kwargs):
+        if out_trade_no and transaction_id:
+            raise self.WxPayError('out_trade_no or transaction_id, '
+                                  'only choose one')
+        path = '/pay/orderquery'
+        params = {}
+        if out_trade_no:
+            params['out_trade_no'] = out_trade_no
+        if transaction_id:
+            params['transaction_id'] = transaction_id
+        params.update(**kwargs)
+        return await self._do_post(path, params)
+
     async def jsapi_order_params(self, out_trade_no, total_fee, body,
                                  notify_url, spbill_create_ip, time_expire,
                                  open_id, **kwargs):
@@ -255,6 +272,33 @@ class AioWx:
                     open_id = result.get('openid')
                     union_id = result.get('unionid')
                     return access_token, open_id, union_id
+        except asyncio.TimeoutError:
+            raise self.TimeoutError()
+
+    async def template_send(self, access_token, open_id, template_id,
+                            template_params, redirect_url='',
+                            topcolor='#FF0000'):
+        url = 'https://api.weixin.qq.com/cgi-bin/message/template/send' \
+              '?access_token={}'.format(access_token)
+        data = {
+            'touser': open_id,
+            'template_id': template_id,
+            'url': redirect_url,
+            'topcolor': topcolor,
+            'data': template_params,
+        }
+
+        try:
+            with aiohttp.Timeout(self.timeout):
+                async with self.session.post(url, json=data) as resp:
+                    if resp.status != 200:
+                        raise self.WxAuthError()
+                    body = await resp.text(encoding='utf-8')
+                    json_body = json.loads(body)
+                    errcode = json_body.get('errcode')
+                    if errcode > 0:
+                        raise self.WxError()
+                    return {'msgid': json_body.get('msgid')}
         except asyncio.TimeoutError:
             raise self.TimeoutError()
 
