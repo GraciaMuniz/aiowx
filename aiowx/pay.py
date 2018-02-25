@@ -131,12 +131,23 @@ class AioWxPay:
             **kwargs,
         )
         prepay_id = result.get('prepay_id')
+        now = int(time.time())
+        nonce = gen_nonce()
+        to_sign_param = {
+            'appid': self.app_id,
+            'partnerid': self.mch_id,
+            'prepayid': prepay_id,
+            'package': 'Sign=WXPay',
+            'noncestr': nonce,
+            'timestamp': now,
+        }
+        sign = gen_sign(to_sign_param, self.key)
         param = {
             'partnerId': self.mch_id,
             'prepayId': prepay_id,
             'package': 'Sign=WXPay',
-            'nonceStr': gen_nonce(),
-            'timeStamp': int(time.time()),
+            'nonceStr': nonce,
+            'timeStamp': now,
+            'sign': sign,
         }
-        param['sign'] = gen_sign(param, self.key)
         return param
