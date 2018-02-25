@@ -132,7 +132,7 @@ class AioWxPay:
         )
         prepay_id = result.get('prepay_id')
         param = {
-            'partnerId': self.app_id,
+            'partnerId': self.mch_id,
             'prepayId': prepay_id,
             'package': 'Sign=WXPay',
             'nonceStr': gen_nonce(),
