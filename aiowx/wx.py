@@ -27,8 +27,9 @@ class AioWx(AioWxAuth, AioWxPay, AioWxMessage):
             conn = aiohttp.TCPConnector(limit=1024, ssl_context=ssl_context)
         else:
             conn = aiohttp.TCPConnector(limit=1024)
-        self.session = aiohttp.ClientSession(connector=conn,
-                                             skip_auto_headers={'Content-Type'})
+        self._session = aiohttp.ClientSession(
+            connector=conn, skip_auto_headers={'Content-Type'},
+        )
         self.app_id = app_id
         self.app_secret = app_secret
         self.mch_id = mch_id
@@ -36,8 +37,8 @@ class AioWx(AioWxAuth, AioWxPay, AioWxMessage):
         self.timeout = timeout
 
     def __del__(self):
-        if not self.session.closed:
-            if self.session._connector is not None \
-                    and self.session._connector_owner:
-                self.session._connector.close()
-            self.session._connector = None
+        if not self._session.closed:
+            if self._session._connector is not None \
+                    and self._session._connector_owner:
+                self._session._connector.close()
+            self._session._connector = None

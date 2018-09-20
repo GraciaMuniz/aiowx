@@ -17,7 +17,7 @@ class AioWxAuth:
 
     async def _do_auth_get(self, url):
         try:
-            async with self.session.get(url, timeout=self.timeout) as resp:
+            async with self._session.get(url, timeout=self.timeout) as resp:
                 if resp.status != 200:
                     raise AioWxAuthError()
                 body = await resp.text(encoding='utf-8')
@@ -32,7 +32,7 @@ class AioWxAuth:
     async def get_access_token(self):
         url = 'https://api.weixin.qq.com/cgi-bin/token' \
               '?grant_type=client_credential&appid={}&secret={}'.format(
-                self.app_id, self.app_secret)
+            self.app_id, self.app_secret)
         json_body = await self._do_auth_get(url)
         return json_body.get('access_token')
 
@@ -68,8 +68,8 @@ class AioWxAuth:
             'grant_type={grant_type}'.format(**params)
 
         try:
-            async with self.session.get(wx_access_token_url, params=params,
-                                        timeout=self.timeout) as resp:
+            async with self._session.get(wx_access_token_url, params=params,
+                                         timeout=self.timeout) as resp:
                 if resp.status != 200:
                     raise AioWxAuthError()
                 resp_text = await resp.text()
@@ -81,5 +81,28 @@ class AioWxAuth:
                 open_id = result.get('openid')
                 union_id = result.get('unionid')
                 return access_token, open_id, union_id
+        except asyncio.TimeoutError:
+            raise AioWxTimeoutError()
+
+    async def user_info(self, access_token, open_id):
+        params = {
+            'access_token': access_token,
+            'open_id': open_id,
+        }
+
+        wx_user_info_url = \
+            'https://api.weixin.qq.com/sns/userinfo?' \
+            'access_token={access_token}&openid={open_id}'.format(**params)
+
+        try:
+            async with self._session.get(wx_user_info_url, params=params,
+                                         timeout=self.timeout) as resp:
+                if resp.status != 200:
+                    raise AioWxAuthError()
+                resp_text = await resp.text()
+                result = json.loads(resp_text)
+                if 'errcode' in result:
+                    raise AioWxAuthError('AuthenticationFailed')
+                return result
         except asyncio.TimeoutError:
             raise AioWxTimeoutError()

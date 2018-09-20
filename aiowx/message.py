@@ -23,8 +23,8 @@ class AioWxMessage:
         }
 
         try:
-            async with self.session.post(url, json=data,
-                                         timeout=self.timeout) as resp:
+            async with self._session.post(url, json=data,
+                                          timeout=self.timeout) as resp:
                 if resp.status != 200:
                     raise AioWxMessageError()
                 body = await resp.text(encoding='utf-8')

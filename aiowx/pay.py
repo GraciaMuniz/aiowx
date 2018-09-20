@@ -16,7 +16,6 @@ from .util import (
 
 
 class AioWxPay:
-
     WXPAY_HOST = 'https://api.mch.weixin.qq.com'
 
     async def _do_pay_post(self, path, params):
@@ -36,8 +35,8 @@ class AioWxPay:
         body = dict_to_xml(common_params)
 
         try:
-            async with self.session.post(url, headers=headers, data=body,
-                                         timeout=self.timeout) as resp:
+            async with self._session.post(url, headers=headers, data=body,
+                                          timeout=self.timeout) as resp:
                 if resp.status != 200:
                     raise AioWxPayError()
                 body = await resp.text(encoding='utf-8')
