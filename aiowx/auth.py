@@ -106,3 +106,32 @@ class AioWxAuth:
                 return result
         except asyncio.TimeoutError:
             raise AioWxTimeoutError()
+
+    async def jscode2session(self, code):
+        params = {
+            'appid': self.app_id,
+            'secret': self.app_secret,
+            'code': code,
+            'grant_type': 'authorization_code',
+        }
+
+        wx_access_token_url = \
+            'https://api.weixin.qq.com/sns/jscode2session?' \
+            'appid={appid}&secret={secret}&js_code={code}&' \
+            'grant_type={grant_type}'.format(**params)
+
+        try:
+            async with self._session.get(wx_access_token_url, params=params,
+                                         timeout=self.timeout) as resp:
+                if resp.status != 200:
+                    raise AioWxAuthError()
+                resp_text = await resp.text()
+                result = json.loads(resp_text)
+                if 'errcode' in result:
+                    raise AioWxAuthError('AuthenticationFailed')
+
+                open_id = result.get('openid')
+                union_id = result.get('unionid')
+                return open_id, union_id
+        except asyncio.TimeoutError:
+            raise AioWxTimeoutError()
