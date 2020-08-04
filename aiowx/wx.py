@@ -35,10 +35,3 @@ class AioWx(AioWxAuth, AioWxPay, AioWxMessage):
         self.mch_id = mch_id
         self.key = key
         self.timeout = timeout
-
-    def __del__(self):
-        if not self._session.closed:
-            if self._session._connector is not None \
-                    and self._session._connector_owner:
-                self._session._connector.close()
-            self._session._connector = None
