@@ -140,7 +140,7 @@ class AioWxAuth:
                 open_id = result.get('openid')
                 union_id = result.get('unionid')
                 session_key = result.get('session_key')
-                return self.Jscode2SessionResult(open_id, union_id, session_key)
+                return self.Jscode2SessionResult(open_id, session_key, union_id)
 
         except asyncio.TimeoutError:
             raise AioWxTimeoutError()
