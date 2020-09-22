@@ -107,6 +107,13 @@ class AioWxAuth:
         except asyncio.TimeoutError:
             raise AioWxTimeoutError()
 
+    class Jscode2SessionResult:
+
+        def __init__(self, open_id, session_key, union_id=None):
+            self.open_id = open_id
+            self.union_id = union_id
+            self.session_key = session_key
+
     async def jscode2session(self, code):
         params = {
             'appid': self.app_id,
@@ -132,6 +139,8 @@ class AioWxAuth:
 
                 open_id = result.get('openid')
                 union_id = result.get('unionid')
-                return open_id, union_id
+                session_key = result.get('session_key')
+                return Jscode2SessionResult(open_id, union_id, session_key)
+
         except asyncio.TimeoutError:
             raise AioWxTimeoutError()
