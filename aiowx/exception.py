@@ -17,3 +17,7 @@ class AioWxPayError(AioWxError):
 
 class AioWxMessageError(AioWxError):
     pass
+
+
+class AioWxDecryptError(AioWxError):
+    pass
