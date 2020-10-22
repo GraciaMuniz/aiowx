@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='aiowx',
-    version='0.8',
+    version='0.9',
     description='Asyncio-based client for Wei Xin Platform',
     author='Rocky Feng',
     author_email='folowing@gmail.com',
